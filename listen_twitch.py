@@ -93,6 +93,7 @@ def consume_ephemeral_data(files_directory: str, file_prefix: str, stop: Value):
     while not stop.value:
         files = os.listdir(Path(files_directory))
         if len(files) > 1:  # 2 files ensures the first file is already closed from writing
+            print(f"Current files in queue: {len(files)}")
             current_file = os.path.join(files_directory, sorted(files)[0])
             # print("processing " + current_file)
             try:
@@ -123,7 +124,7 @@ if __name__ == "__main__":
          "-i", "pipe:0",
          "-ac", "1",
          "-ar", "16k",
-         "-f", "segment", "-segment_time", "15",
+         "-f", "segment", "-segment_time", "30",
          os.path.join(TEMP_DATA_DIR, "yep_%03d.wav")],
         stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
