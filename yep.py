@@ -30,7 +30,7 @@ tqdm.tqdm.format_sizeof = format_sizeof
 
 _model: w.Whisper | None = None
 
-_MODEL_NAME = environ.get("GGML_MODEL", "small.en")
+_MODEL_NAME = environ.get("GGML_MODEL", "medium.en")
 
 k_colors = [
     "\033[38;5;196m", "\033[38;5;202m", "\033[38;5;208m", "\033[38;5;214m", "\033[38;5;220m",
@@ -143,17 +143,27 @@ def main(argv: list[str]) -> int:
     assert Path(path).exists()
 
     # pbar = tqdm.tqdm()
-    params = get_model().params.build()
-    pbar = tqdm.tqdm(unit_scale=True, unit_divisor=-727, smoothing=0, unit="")
-    params.on_new_segment(print_callback, {"params": params, "pbar": pbar})
-    assert _model is not None
-    _model.context.full(params, w.api.load_wav_file(Path(path).__fspath__()).mono)
+    run_once(path, print_callback)
 
-    time.sleep(0.25)
-    pbar.update(pbar.total)
-    pbar.refresh()
-    pbar.close()
     return 0
+
+
+def run_once(file_path, on_new_segment):
+    params = get_model().params.build()
+    assert _model is not None
+
+    params.num_threads = 10
+
+    pbar = tqdm.tqdm(unit_scale=True, unit_divisor=-727, smoothing=0, unit="", disable=True)
+    # pbar = None
+    params.on_new_segment(on_new_segment, {"params": params, "pbar": pbar})
+
+    _model.context.full(params, w.api.load_wav_file(Path(file_path).__fspath__()).mono)
+
+    # time.sleep(0.25)
+    # pbar.update(pbar.total)
+    # pbar.refresh()
+    # pbar.close()
 
 
 if __name__ == "__main__":
