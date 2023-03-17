@@ -117,7 +117,7 @@ def print_callback(ctx: w.api.Context, n_new: int, userdata: dict):
     n_segments = ctx.full_n_segments()
 
     for i in range(n_segments - n_new, n_segments):
-        print("\r" if out_file == sys.stdout else "", end="", file=out_file)
+        print("\r" if out_file.isatty() else "", end="", file=out_file)
         if params.print_timestamps:
             print(f"[{to_timestamp(ctx.full_get_segment_start(i))} --> {to_timestamp(ctx.full_get_segment_end(i))}]  ",
                   end="", file=out_file)
