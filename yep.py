@@ -43,7 +43,7 @@ def get_model() -> w.Whisper:
     global _model
     if _model is None:
         _model = w.Whisper.from_pretrained(_MODEL_NAME)
-        print(_model.context.sys_info())
+        print(f"Capabilities: {_model.context.sys_info()}", file=sys.stderr)
     return _model
 
 
@@ -144,22 +144,33 @@ def main(argv: list[str]) -> int:
     assert Path(path).exists()
 
     # pbar = tqdm.tqdm()
-    run_once(path, print_callback)
+    run_once(path, print_callback, True)
 
     return 0
 
 
-def run_once(file_path, on_new_segment):
+def run_once(file_path, on_new_segment, print_inference_time=False):
+    # start_time = time.perf_counter()
+    _model_was_none = _model is None
     params = get_model().params.build()
     assert _model is not None
-
-    params.num_threads = 10
+    # if _model_was_none:
+    #     print(f"Model load time: {time.perf_counter() - start_time:.03f}s", file=sys.stderr)
 
     pbar = tqdm.tqdm(unit_scale=True, unit_divisor=-727, smoothing=0, unit="", disable=True)
     # pbar = None
     params.on_new_segment(on_new_segment, {"params": params, "pbar": pbar})
+    params.with_num_threads(3)
+    params.with_speed_up(False)
+    strategies: w.api.SamplingStrategies = w.api.SamplingStrategies.from_enum(w.api.SAMPLING_BEAM_SEARCH)
+    strategies.beam_search.with_beam_size(3)
+    params.from_sampling_strategy(strategies)
 
+    # start_time = time.perf_counter()
     _model.context.full(params, w.api.load_wav_file(Path(file_path).__fspath__()).mono)
+    # print(f"Inference time: {time.perf_counter() - start_time:.03f}s\n" if print_inference_time else "", end="")
+    if print_inference_time:
+        _model.context.print_timings()
 
     # time.sleep(0.25)
     # pbar.update(pbar.total)

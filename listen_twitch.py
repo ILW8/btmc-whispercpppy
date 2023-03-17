@@ -1,11 +1,9 @@
-import random
 import subprocess
 import sys
 import time
 from pathlib import Path
 
 import streamlink
-import ffmpeg  # python-ffmpeg
 
 from yep import run_once, print_callback
 
@@ -84,14 +82,16 @@ from multiprocessing import Process, Value
 import os
 import tempfile
 
-CHANNEL_NAME = "maciejay"
+CHANNEL_NAME = "boxbox"
 TEMP_DATA_DIR_TD = tempfile.TemporaryDirectory()
 TEMP_DATA_DIR = TEMP_DATA_DIR_TD.name
 
 
-def consume_ephemeral_data(files_directory: str, file_prefix: str, stop: Value):
+def consume_ephemeral_data(files_directory: str, stop: Value):
+    # TODO: feed model context from previous inference run
+    # TODO: add some overlap between segments to recover potentially lost words
     while not stop.value:
-        files = os.listdir(Path(files_directory))
+        files: list[str] = os.listdir(Path(files_directory))
         if len(files) > 1:  # 2 files ensures the first file is already closed from writing
             start_time = time.perf_counter()
             print(f"Current files in queue: {len(files)}")
@@ -111,7 +111,7 @@ def consume_ephemeral_data(files_directory: str, file_prefix: str, stop: Value):
 
 if __name__ == "__main__":
     should_stop = Value(c_bool, False)
-    consumer_proc = Process(target=consume_ephemeral_data, args=(TEMP_DATA_DIR, "yep_", should_stop))
+    consumer_proc = Process(target=consume_ephemeral_data, args=(TEMP_DATA_DIR, should_stop))
     consumer_proc.start()
 
     streams = streamlink.streams(f"https://twitch.tv/{CHANNEL_NAME}")
