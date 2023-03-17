@@ -185,26 +185,21 @@ def main(argv: list[str]) -> int:
     assert Path(path).exists()
 
     # pbar = tqdm.tqdm()
-    run_once(path, multi_callback_entrypoint, True)
+    run_once(path, multi_callback_entrypoint, True, str(datetime.datetime.utcnow().timestamp()))
 
     return 0
 
 
-def run_once(file_path, on_new_segment, print_inference_time=False):
-    # start_time = time.perf_counter()
+def run_once(file_path, on_new_segment, print_inference_time=False, output_file_name: str = ""):
     _model_was_none = _model is None
     params = get_model().params.build()
     assert _model is not None
-    # if _model_was_none:
-    #     print(f"Model load time: {time.perf_counter() - start_time:.03f}s", file=sys.stderr)
 
-    # pbar = tqdm.tqdm(unit_scale=True, unit_divisor=-727, smoothing=0, unit="", disable=True)
-    # pbar = None
-    # params.on_new_segment(on_new_segment, {"params": params, "pbar": pbar})
+    if len(output_file_name) == 0 or Path(f"{output_file_name}.srt").exists() or Path(f"{output_file_name}.txt"):
+        raise RuntimeError("invalid filename/files exist, not overwriting")
 
-    ts = datetime.datetime.utcnow().timestamp()
-    srt_out = open(f"{ts}.srt", "w")
-    txt_out = open(f"{ts}.txt", "w")
+    srt_out = open(f"{output_file_name}.srt", "w")
+    txt_out = open(f"{output_file_name}.txt", "w")
 
     params.on_new_segment(on_new_segment, {"params":      params,
                                            "output_file": [txt_out, srt_out, sys.stdout],
