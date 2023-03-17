@@ -41,16 +41,16 @@ k_colors = [
 ]
 
 srt_colors = [
-    "#56ff40",
-    "#8bf000",
-    "#ace000",
-    "#c6d000",
-    "#dabe00",
-    "#eaac00",
-    "#f59a00",
-    "#fd870b",
-    "#ff752b",
     "#ff6440",
+    "#ff752b",
+    "#fd870b",
+    "#f59a00",
+    "#eaac00",
+    "#dabe00",
+    "#c6d000",
+    "#ace000",
+    "#8bf000",
+    "#56ff40",
 ]
 
 
@@ -117,7 +117,7 @@ def print_callback(ctx: w.api.Context, n_new: int, userdata: dict):
     n_segments = ctx.full_n_segments()
 
     for i in range(n_segments - n_new, n_segments):
-        print("\r", end="", file=out_file)
+        print("\r" if out_file == sys.stdout else "", end="", file=out_file)
         if params.print_timestamps:
             print(f"[{to_timestamp(ctx.full_get_segment_start(i))} --> {to_timestamp(ctx.full_get_segment_end(i))}]  ",
                   end="", file=out_file)
@@ -138,7 +138,7 @@ def print_callback(ctx: w.api.Context, n_new: int, userdata: dict):
                 continue
 
             print(text, end="", file=out_file)
-        print(file=out_file)
+        print("", file=out_file)
     return
 
 
