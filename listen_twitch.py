@@ -84,7 +84,7 @@ from multiprocessing import Process, Value
 import os
 import tempfile
 
-CHANNEL_NAME = "jynxzi"
+CHANNEL_NAME = "maciejay"
 TEMP_DATA_DIR_TD = tempfile.TemporaryDirectory()
 TEMP_DATA_DIR = TEMP_DATA_DIR_TD.name
 
@@ -93,6 +93,7 @@ def consume_ephemeral_data(files_directory: str, file_prefix: str, stop: Value):
     while not stop.value:
         files = os.listdir(Path(files_directory))
         if len(files) > 1:  # 2 files ensures the first file is already closed from writing
+            start_time = time.perf_counter()
             print(f"Current files in queue: {len(files)}")
             current_file = os.path.join(files_directory, sorted(files)[0])
             # print("processing " + current_file)
@@ -101,6 +102,7 @@ def consume_ephemeral_data(files_directory: str, file_prefix: str, stop: Value):
                 os.unlink(current_file)
             except UnicodeDecodeError:
                 pass
+            print(f"Time elapsed: {time.perf_counter() -    start_time}s | ", end="")
         sys.stdout.flush()
 
         time.sleep(0.1)
@@ -128,6 +130,7 @@ if __name__ == "__main__":
          os.path.join(TEMP_DATA_DIR, "yep_%03d.wav")],
         stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
+    print("Spawned ffmpeg process")
 
     pbar = tqdm(unit_scale=True, unit_divisor=1024, unit="B")
     audio_stream_fd = streams["audio_only"].open()

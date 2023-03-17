@@ -43,6 +43,7 @@ def get_model() -> w.Whisper:
     global _model
     if _model is None:
         _model = w.Whisper.from_pretrained(_MODEL_NAME)
+        print(_model.context.sys_info())
     return _model
 
 
