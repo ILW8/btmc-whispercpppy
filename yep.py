@@ -201,7 +201,7 @@ def run_once(file_path, on_new_segment, print_inference_time=False, output_file_
     params = get_model().params.build()
     assert _model is not None
 
-    if len(output_file_name) == 0 or Path(f"{output_file_name}.srt").exists() or Path(f"{output_file_name}.txt"):
+    if len(output_file_name) == 0 or Path(f"{output_file_name}.srt").exists() or Path(f"{output_file_name}.txt").exists():
         raise RuntimeError("invalid filename/files exist, not overwriting")
 
     srt_out = open(f"{output_file_name}.srt", "w")
