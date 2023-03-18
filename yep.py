@@ -218,8 +218,8 @@ def run_once(file_path, on_new_segment, print_inference_time=False, output_file_
     # params.from_sampling_strategy(strategies)
 
     params.with_num_max_text_ctx(_MAX_CONTEXT)
-    params.with_offset_ms(180000)
-    params.with_duration_ms(120000)
+    # params.with_offset_ms(180000)
+    # params.with_duration_ms(120000)
 
     # start_time = time.perf_counter()
     audio_data = w.api.load_wav_file(Path(file_path).__fspath__()).mono
