@@ -211,6 +211,7 @@ def run_once(file_path, on_new_segment, print_inference_time=False, output_file_
                                            "output_file": [txt_out, srt_out, sys.stdout],
                                            "use_colors":  [False, True, True]})
 
+    params.with_entropy_threshold(2.53)
     params.with_num_threads(3)
     params.with_speed_up(False)
     # strategies: w.api.SamplingStrategies = w.api.SamplingStrategies.from_enum(w.api.SAMPLING_BEAM_SEARCH)
