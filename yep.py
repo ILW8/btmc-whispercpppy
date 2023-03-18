@@ -109,6 +109,15 @@ def multi_callback_entrypoint(ctx: w.api.Context, n_new: int, userdata: dict) ->
                                            "output_file": userdata["output_file"][2]})
 
 
+def get_token_text(ctx, i, j):
+    try:
+        text = ctx.full_get_token_text(i, j)
+    except UnicodeDecodeError as e:
+        print(f"Unable to parse token text: {e}", file=sys.stderr)
+        text = "?TokenDecodeFailed?"
+    return text
+
+
 def print_callback(ctx: w.api.Context, n_new: int, userdata: dict):
     params: w.api.Params = userdata["params"]
     out_file: IO = userdata.get("output_file", sys.stdout)
@@ -128,11 +137,7 @@ def print_callback(ctx: w.api.Context, n_new: int, userdata: dict):
                 if w_token_id >= ctx.eot_token:
                     continue
 
-            try:
-                text = ctx.full_get_token_text(i, j)
-            except UnicodeDecodeError as e:
-                print(f"Unable to parse token text: {e}", file=sys.stderr)
-                text = "?TokenDecodeFailed?"
+            text = get_token_text(ctx, i, j)
             proba = ctx.full_get_token_prob(i, j)
 
             if use_colors:
@@ -165,7 +170,7 @@ def save_to_srt(ctx: w.api.Context, n_new: int, userdata: dict):
                 if w_token_id >= ctx.eot_token:
                     continue
 
-            text = ctx.full_get_token_text(i, j)
+            text = get_token_text(ctx, i, j)
 
             out_file.write(f"<font color={srt_colors[get_color_index(srt_colors, ctx.full_get_token_prob(i, j))]}>"
                            if use_colors else "")
