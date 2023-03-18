@@ -177,17 +177,23 @@ def get_color_index(colors: collections.abc.Sized, token_proba: float):
 
 def main(argv: list[str]) -> int:
     if len(argv) < 1:
-        sys.stderr.write("Usage: yep.py <audio file>\n")
+        sys.stderr.write("Usage: yep.py <audio file> [audio files...]\n")
         sys.stderr.flush()
         return 1
 
-    path = argv.pop(0)
-    assert Path(path).exists()
+    if len(argv) == 1:
+        path = argv.pop(0)
+        assert Path(path).exists()
 
-    # pbar = tqdm.tqdm()
-    run_once(path, multi_callback_entrypoint, True, str(datetime.datetime.utcnow().timestamp()))
+        # pbar = tqdm.tqdm()
+        run_once(path, multi_callback_entrypoint, True, str(datetime.datetime.utcnow().timestamp()))
 
-    return 0
+        return 0
+
+    for path in argv:
+        plp = Path(path)
+        assert plp.exists()
+        run_once(path, multi_callback_entrypoint, True, f"{plp.stem}_{_MODEL_NAME}_{_MAX_CONTEXT}")
 
 
 def run_once(file_path, on_new_segment, print_inference_time=False, output_file_name: str = ""):
