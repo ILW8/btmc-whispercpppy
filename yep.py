@@ -8,7 +8,6 @@ import datetime
 import math
 import sys
 import functools as f
-import time
 from os import environ
 from pathlib import Path
 
@@ -34,6 +33,7 @@ _model: w.Whisper | None = None
 
 _MODEL_NAME = environ.get("GGML_MODEL", "medium.en")
 _MAX_CONTEXT = int(environ.get("MAX_CONTEXT", "16384"))
+_NUM_THREADS = int(environ.get("NUM_THREADS", 3))
 
 k_colors = [
     "\033[38;5;196m", "\033[38;5;202m", "\033[38;5;208m", "\033[38;5;214m", "\033[38;5;220m",
@@ -210,7 +210,9 @@ def run_once(file_path, on_new_segment, print_inference_time=False, output_file_
     params = get_model().params.build()
     assert _model is not None
 
-    if len(output_file_name) == 0 or Path(f"{output_file_name}.srt").exists() or Path(f"{output_file_name}.txt").exists():
+    if len(output_file_name) == 0 or \
+            Path(f"{output_file_name}.srt").exists() or \
+            Path(f"{output_file_name}.txt").exists():
         raise RuntimeError("invalid filename/files exist, not overwriting")
 
     srt_out = open(f"{output_file_name}.srt", "w")
@@ -221,7 +223,7 @@ def run_once(file_path, on_new_segment, print_inference_time=False, output_file_
                                            "use_colors":  [False, True, True]})
 
     params.with_entropy_thold(2.53)
-    params.with_num_threads(3)
+    params.with_num_threads(_NUM_THREADS)
     params.with_speed_up(False)
     # strategies: w.api.SamplingStrategies = w.api.SamplingStrategies.from_enum(w.api.SAMPLING_BEAM_SEARCH)
     # strategies.beam_search.with_beam_size(3)
