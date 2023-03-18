@@ -128,7 +128,11 @@ def print_callback(ctx: w.api.Context, n_new: int, userdata: dict):
                 if w_token_id >= ctx.eot_token:
                     continue
 
-            text = ctx.full_get_token_text(i, j)
+            try:
+                text = ctx.full_get_token_text(i, j)
+            except UnicodeDecodeError as e:
+                print(f"Unable to parse token text: {e}", file=sys.stderr)
+                text = "?TokenDecodeFailed?"
             proba = ctx.full_get_token_prob(i, j)
 
             if use_colors:
